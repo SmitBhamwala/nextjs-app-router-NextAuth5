@@ -6,6 +6,7 @@ import { AuthError } from "next-auth";
 import { LoginSchema } from "@/schemas";
 import { signIn } from "@/auth";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import { getUserByEmail } from "@/helpers/user";
 
 export default async function loginUser(values: z.infer<typeof LoginSchema>) {
   const validatedFields = LoginSchema.safeParse(values);
@@ -14,6 +15,12 @@ export default async function loginUser(values: z.infer<typeof LoginSchema>) {
   }
 
   const { email, password } = validatedFields.data;
+
+  const existingUser = await getUserByEmail(email);
+
+  if (!existingUser) {
+    return { error: "Email does not exist. Please register!!" };
+  }
 
   try {
     await signIn("credentials", {
