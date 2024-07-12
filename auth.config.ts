@@ -41,6 +41,11 @@ export default {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          prompt: "consent",
+        },
+      },
     }),
   ],
 } satisfies NextAuthConfig;

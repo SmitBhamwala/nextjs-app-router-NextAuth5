@@ -119,7 +119,7 @@ export default function RegisterForm() {
           <FormError message={error} />
           <FormSuccess message={success} />
           <Button type="submit" className="w-full" disabled={isPending}>
-            Create an account
+            {isPending ? "Creating an account..." : "Create an account"}
           </Button>
         </form>
       </Form>

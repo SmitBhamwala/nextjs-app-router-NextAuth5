@@ -2,9 +2,9 @@
 
 import * as z from "zod";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, Suspense } from "react";
 import { useForm } from "react-hook-form";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
@@ -24,14 +24,9 @@ import { FormSuccess } from "@/components/form-success";
 import loginUser from "@/actions/login";
 
 export default function LoginForm() {
-  const searchParams = useSearchParams();
-  const urlError =
-    searchParams.get("error") === "OAuthAccountNotLinked"
-      ? "Email already in use with a different provider!!"
-      : "";
-
+  const router = useRouter();
   const [success, setSuccess] = useState<string | undefined>("");
-  const [error, setError] = useState<string | undefined>(urlError);
+  const [error, setError] = useState<string | undefined>("");
   const [isPending, startTranition] = useTransition();
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -41,7 +36,19 @@ export default function LoginForm() {
     },
   });
 
+  function FormErrorState() {
+    const searchParams = useSearchParams();
+
+    const urlError =
+      searchParams.get("error") === "OAuthAccountNotLinked"
+        ? "Email already in use with a different provider!!"
+        : "";
+
+    return <FormError message={error || urlError} />;
+  }
+
   function onSubmitHandler(values: z.infer<typeof LoginSchema>) {
+    router.push("/auth/login");
     setError("");
     setSuccess("");
     startTranition(() => {
@@ -102,10 +109,12 @@ export default function LoginForm() {
               )}
             />
           </div>
-          <FormError message={error} />
+          <Suspense fallback={<p>.</p>}>
+            <FormErrorState />
+          </Suspense>
           <FormSuccess message={success} />
           <Button type="submit" className="w-full" disabled={isPending}>
-            Login
+            {isPending ? "Logging in..." : "Login"}
           </Button>
         </form>
       </Form>

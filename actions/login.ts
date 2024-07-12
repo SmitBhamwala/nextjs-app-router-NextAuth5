@@ -22,6 +22,11 @@ export default async function loginUser(values: z.infer<typeof LoginSchema>) {
     return { error: "Email does not exist. Please register!!" };
   }
 
+  // Email registered using Github or Google
+  if (!existingUser.password) {
+    return { error: "Email already in use with a different provider!!" };
+  }
+
   try {
     await signIn("credentials", {
       email,
